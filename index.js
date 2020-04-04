@@ -11,10 +11,10 @@ exports.handler = async (event) => {
   const log = console.log
 
   await stripe.setup()
-  await Process.process({ 
+  event.Records.map(record => Process.process(record, { 
     stripe, log, 
     amount: event.amount, 
     event: event.customerId, 
     idempotencyKey: event.idempotencyKey,
-  })
+  }))
 }
