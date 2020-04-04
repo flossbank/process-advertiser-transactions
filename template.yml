@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Processes charges for advertisers based on events put into queue 
+Parameters:
+  StripeSecretKey:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: '/api/stripe/secret_key'
+Resources:
+  ProcessAdvertiserTransactionsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Events: 
+        UABSchedule:
+          Properties:
+            Description: Every week
+            Enabled: true
+            Name: ProcessAdvertiserTransactionsSchedule
+            Schedule: rate(7 days)
+          Type: Schedule
+      Timeout: 180
+      Handler: index.handler
+      Runtime: nodejs10.x
+      CodeUri: ./
+      Policies:
+        - Statement:
+          - Effect: Allow
+            Action:
+              - 'kms:Decrypt'
+              - 'kms:ListKeys'
+            Resource: '*'
+      Environment:
+        Variables:
+          STRIPE_SECRET_KEY: !Ref StripeSecretKey

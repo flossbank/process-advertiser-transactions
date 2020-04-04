@@ -1,0 +1,32 @@
+{
+  "name": "process-advertiser-transactions",
+  "version": "1.0.0",
+  "description": "process-advertiser-transactions",
+  "main": "index.js",
+  "scripts": {
+    "ci-tests": "nyc --reporter=cobertura ava -t | tap-xunit > TEST_RESULTS.xml",
+    "test": "ava -v"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.543.0",
+    "stripe": "^8.22.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flossbank/process-advertiser-transactions.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/flossbank/process-advertiser-transactions/issues"
+  },
+  "homepage": "https://github.com/flossbank/process-advertiser-transactions#readme",
+  "devDependencies": {
+    "ava": "^3.5.1",
+    "nyc": "^15.0.0",
+    "sinon": "^9.0.1",
+    "standard": "^14.3.1",
+    "tap-xunit": "^2.4.1"
+  }
+}
