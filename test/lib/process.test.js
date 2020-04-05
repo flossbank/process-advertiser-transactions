@@ -6,8 +6,12 @@ test.beforeEach((t) => {
   t.context.stripe = {
     chargeAdvertiser: sinon.stub().resolves()
   }
+  t.context.db = {
+    updateAdvertiserBalance: sinon.stub().resolves(),
+  }
   t.context.idempotencyKey = 'piedpiper'
   t.context.customerId = 'joepug-id'
+  t.context.advertiserId = 'bogus-adv'
   t.context.amount = 500 // 5 bucks
 })
 
@@ -16,12 +20,19 @@ test('processes an advertiser transaction', async (t) => {
   await Process.process({ 
     stripe: t.context.stripe, 
     log, 
-    idempotencyKey: t.context.idempotencyKey, 
+    db: t.context.db,
+    idempotencyKey: t.context.idempotencyKey,
+    advertiserId: t.context.advertiserId, 
     amount: t.context.amount,
     customerId: t.context.customerId,
   })
   t.true(t.context.stripe.chargeAdvertiser.calledOnce)
-  t.true(log.calledWith('success, charged customer: %s, amount: %s', 'joepug-id', 500))
+  t.true(log.calledWith(
+    'success, charged customer: %s, amount: %s, with mongo id: %s',
+    t.context.customerId, 
+    t.context.amount, 
+    t.context.advertiserId,
+  ))
 })
 
 test('updates advertisers balances | errors with stripe', async (t) => {
@@ -31,10 +42,37 @@ test('updates advertisers balances | errors with stripe', async (t) => {
     await Process.process({ 
       stripe: t.context.stripe, 
       log,
+      db: t.context.db,
       idempotencyKey: t.context.idempotencyKey,
+      advertiserId: t.context.advertiserId, 
       amount: t.context.amount,
       customerId: t.context.customerId,
     })
   } catch (e) {}
-  t.true(log.calledWith('error charging with idempotencyKey: %s', 'piedpiper'))
+  t.true(log.calledWith(
+    'error processing charge with idempotencyKey: %s, advertiserId: %s', 
+    t.context.idempotencyKey, 
+    t.context.advertiserId,
+  ))
+})
+
+test('updates advertisers balances | errors with mongo', async (t) => {
+  t.context.db.updateAdvertiserBalance.rejects(new Error('mongo error happened'))
+  const log = sinon.stub()
+  try {
+    await Process.process({ 
+      stripe: t.context.stripe, 
+      log,
+      db: t.context.db,
+      idempotencyKey: t.context.idempotencyKey,
+      advertiserId: t.context.advertiserId, 
+      amount: t.context.amount,
+      customerId: t.context.customerId,
+    })
+  } catch (e) {}
+  t.true(log.calledWith(
+    'error processing charge with idempotencyKey: %s, advertiserId: %s', 
+    t.context.idempotencyKey, 
+    t.context.advertiserId,
+  ))
 })

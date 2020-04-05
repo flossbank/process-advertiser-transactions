@@ -5,10 +5,12 @@
   "main": "index.js",
   "scripts": {
     "ci-tests": "nyc --reporter=cobertura ava -t | tap-xunit > TEST_RESULTS.xml",
-    "test": "ava -v"
+    "test": "ava -v",
+    "coverage": "nyc npm run test"
   },
   "dependencies": {
     "aws-sdk": "^2.653.0",
+    "mongodb": "^3.5.5",
     "stripe": "^8.22.0"
   },
   "repository": {
