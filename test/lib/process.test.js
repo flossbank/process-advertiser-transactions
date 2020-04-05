@@ -1,6 +1,6 @@
 const test = require('ava')
 const sinon = require('sinon')
-const Process = require('../lib/process')
+const Process = require('../../lib/process')
 
 test.beforeEach((t) => {
   t.context.stripe = {
@@ -8,30 +8,33 @@ test.beforeEach((t) => {
   }
   t.context.idempotencyKey = 'piedpiper'
   t.context.customerId = 'joepug-id'
-  t.context.amount = 100000
+  t.context.amount = 500 // 5 bucks
 })
 
-test('updates advertisers balances', async (t) => {
+test('processes an advertiser transaction', async (t) => {
+  const log = sinon.stub()
   await Process.process({ 
     stripe: t.context.stripe, 
-    log: () => {}, 
+    log, 
     idempotencyKey: t.context.idempotencyKey, 
     amount: t.context.amount,
     customerId: t.context.customerId,
   })
   t.true(t.context.stripe.chargeAdvertiser.calledOnce)
+  t.true(log.calledWith('success, charged customer: %s, amount: %s', 'joepug-id', 500))
 })
 
 test('updates advertisers balances | errors with stripe', async (t) => {
   t.context.stripe.chargeAdvertiser.rejects(new Error('blah happened'))
   const log = sinon.stub()
-  await Process.process({ 
-    stripe: t.context.stripe, 
-    log,
-    idempotencyKey: t.context.idempotencyKey,
-    amount: t.context.amount,
-    customerId: t.context.customerId,
-   })
-
-  t.true(log.calledWith())
+  try {
+    await Process.process({ 
+      stripe: t.context.stripe, 
+      log,
+      idempotencyKey: t.context.idempotencyKey,
+      amount: t.context.amount,
+      customerId: t.context.customerId,
+    })
+  } catch (e) {}
+  t.true(log.calledWith('error charging with idempotencyKey: %s', 'piedpiper'))
 })

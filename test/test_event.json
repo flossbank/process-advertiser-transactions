@@ -1,0 +1,9 @@
+{
+  "Records": [
+    {
+      "customerId": "bahbah-ganoosh",
+      "amount": 500,
+      "idempotencyKey": "1234"
+    }
+  ]
+}

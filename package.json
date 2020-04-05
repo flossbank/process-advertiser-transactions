@@ -8,7 +8,7 @@
     "test": "ava -v"
   },
   "dependencies": {
-    "aws-sdk": "^2.543.0",
+    "aws-sdk": "^2.653.0",
     "stripe": "^8.22.0"
   },
   "repository": {

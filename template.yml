@@ -6,22 +6,32 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<String>
     Default: '/api/stripe/secret_key'
 Resources:
+  ProcessAdvertiserTransactionsDeadLetterQueue:
+    Type: AWS::SQS::Queue
+  ProcessAdvertiserTransactionsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: process-advertiser-transactions-input
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt ProcessAdvertiserTransactionsDeadLetterQueue.Arn
+        maxReceiveCount: 3
+      VisibilityTimeout: 240
   ProcessAdvertiserTransactionsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Events: 
-        UABSchedule:
-          Properties:
-            Description: Every week
-            Enabled: true
-            Name: ProcessAdvertiserTransactionsSchedule
-            Schedule: rate(7 days)
-          Type: Schedule
       Timeout: 180
       Handler: index.handler
       Runtime: nodejs10.x
       CodeUri: ./
+      Events:
+        ProcessAdvertiserTransactionsEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt ProcessAdvertiserTransactionsQueue.Arn
+            BatchSize: 1
       Policies:
+        - AmazonSQSFullAccess
+        - AmazonDynamoDBFullAccess
         - Statement:
           - Effect: Allow
             Action:
