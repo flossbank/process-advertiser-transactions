@@ -9,6 +9,8 @@ const kms = new AWS.KMS({ region: 'us-west-2' })
 exports.handler = async (event) => {
   const config = new Config({ kms })
   const db = new Db({ config })
+  await db.connect()
+  
   const stripe = new Stripe({ config })
   const log = console.log
 
