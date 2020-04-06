@@ -34,7 +34,6 @@ Resources:
             BatchSize: 1
       Policies:
         - AmazonSQSFullAccess
-        - AmazonDynamoDBFullAccess
         - Statement:
           - Effect: Allow
             Action:
