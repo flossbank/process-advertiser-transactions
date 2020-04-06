@@ -12,10 +12,8 @@ test.beforeEach((t) => {
   })
   t.context.mongo.db = {
     collection: sinon.stub().returns({
-      find: sinon.stub().returns({
-        updateOne: sinon.stub().resolves({
-          modifiedCount: 1
-        })
+      updateOne: sinon.stub().resolves({
+        modifiedCount: 1
       })
     })
   }
