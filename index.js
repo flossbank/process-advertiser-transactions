@@ -13,13 +13,10 @@ exports.handler = async (event) => {
   const log = console.log
 
   await stripe.setup()
-  return Promise.all(event.Records.map(record => Process.process({ 
+  return Promise.all(event.Records.map(record => Process.process({
+    record, 
     stripe, 
     log, 
     db,
-    amount: record.amount, 
-    event: record.customerId,
-    advertiserId: record.advertiserId, 
-    idempotencyKey: record.idempotencyKey,
   })))
 }

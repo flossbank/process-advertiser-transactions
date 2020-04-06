@@ -13,6 +13,14 @@ test.beforeEach((t) => {
   t.context.customerId = 'joepug-id'
   t.context.advertiserId = 'bogus-adv'
   t.context.amount = 500 // 5 bucks
+  t.context.record = {
+    body: JSON.stringify({
+      idempotencyKey: t.context.idempotencyKey,
+      advertiserId: t.context.advertiserId, 
+      amount: t.context.amount,
+      customerId: t.context.customerId,
+    })
+  }
 })
 
 test('processes an advertiser transaction', async (t) => {
@@ -21,10 +29,7 @@ test('processes an advertiser transaction', async (t) => {
     stripe: t.context.stripe, 
     log, 
     db: t.context.db,
-    idempotencyKey: t.context.idempotencyKey,
-    advertiserId: t.context.advertiserId, 
-    amount: t.context.amount,
-    customerId: t.context.customerId,
+    record: t.context.record
   })
   t.true(t.context.stripe.chargeAdvertiser.calledOnce)
   t.true(log.calledWith(
@@ -43,10 +48,7 @@ test('updates advertisers balances | errors with stripe', async (t) => {
       stripe: t.context.stripe, 
       log,
       db: t.context.db,
-      idempotencyKey: t.context.idempotencyKey,
-      advertiserId: t.context.advertiserId, 
-      amount: t.context.amount,
-      customerId: t.context.customerId,
+      record: t.context.record,
     })
   } catch (e) {}
   t.true(log.calledWith(
@@ -64,10 +66,7 @@ test('updates advertisers balances | errors with mongo', async (t) => {
       stripe: t.context.stripe, 
       log,
       db: t.context.db,
-      idempotencyKey: t.context.idempotencyKey,
-      advertiserId: t.context.advertiserId, 
-      amount: t.context.amount,
-      customerId: t.context.customerId,
+      record: t.context.record,
     })
   } catch (e) {}
   t.true(log.calledWith(
