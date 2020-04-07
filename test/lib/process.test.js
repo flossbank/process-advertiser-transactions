@@ -9,7 +9,7 @@ test.beforeEach((t) => {
   t.context.idempotencyKey = 'piedpiper'
   t.context.customerId = 'joepug-id'
   t.context.advertiserId = 'bogus-adv'
-  t.context.amount = 500 // 5 bucks
+  t.context.amount = 50000 // 5 bucks
   t.context.record = {
     body: JSON.stringify({
       idempotencyKey: t.context.idempotencyKey,

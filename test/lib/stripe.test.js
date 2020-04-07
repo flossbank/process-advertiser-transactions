@@ -28,6 +28,13 @@ test('chargeAdvertiser', async (t) => {
     amount: t.context.amount,
     customerId: t.context.customerId,
   })
+  t.true(t.context.stripe.stripeClient.customers.createBalanceTransaction.calledWith(t.context.customerId, {
+    amount: t.context.amount / 1000, 
+    currency: 'usd',
+    description: `Flossbank advertising bill for: ${t.context.amount / 1000} cents`
+  }, {
+    idempotencyKey: t.context.idempotencyKey
+  }))
   t.deepEqual(result, 'poo')
 })
 
