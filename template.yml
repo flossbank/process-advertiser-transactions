@@ -2,9 +2,6 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Processes charges for advertisers based on events put into queue 
 Parameters:
-  MongoUri:
-    Type: AWS::SSM::Parameter::Value<String>
-    Default: '/api/db/mongo_uri'
   StripeSecretKey:
     Type: AWS::SSM::Parameter::Value<String>
     Default: '/api/stripe/secret_key'
@@ -42,5 +39,4 @@ Resources:
             Resource: '*'
       Environment:
         Variables:
-          MONGO_URI: !Ref MongoUri
           STRIPE_SECRET_KEY: !Ref StripeSecretKey

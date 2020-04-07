@@ -6,9 +6,6 @@ test.beforeEach((t) => {
   t.context.stripe = {
     chargeAdvertiser: sinon.stub().resolves()
   }
-  t.context.db = {
-    updateAdvertiserBalance: sinon.stub().resolves(),
-  }
   t.context.idempotencyKey = 'piedpiper'
   t.context.customerId = 'joepug-id'
   t.context.advertiserId = 'bogus-adv'
@@ -28,7 +25,6 @@ test('processes an advertiser transaction', async (t) => {
   await Process.process({ 
     stripe: t.context.stripe, 
     log, 
-    db: t.context.db,
     record: t.context.record
   })
   t.true(t.context.stripe.chargeAdvertiser.calledOnce)
@@ -47,25 +43,6 @@ test('updates advertisers balances | errors with stripe', async (t) => {
     await Process.process({ 
       stripe: t.context.stripe, 
       log,
-      db: t.context.db,
-      record: t.context.record,
-    })
-  } catch (e) {}
-  t.true(log.calledWith(
-    'error processing charge with idempotencyKey: %s, advertiserId: %s', 
-    t.context.idempotencyKey, 
-    t.context.advertiserId,
-  ))
-})
-
-test('updates advertisers balances | errors with mongo', async (t) => {
-  t.context.db.updateAdvertiserBalance.rejects(new Error('mongo error happened'))
-  const log = sinon.stub()
-  try {
-    await Process.process({ 
-      stripe: t.context.stripe, 
-      log,
-      db: t.context.db,
       record: t.context.record,
     })
   } catch (e) {}

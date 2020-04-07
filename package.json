@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "aws-sdk": "^2.653.0",
-    "mongodb": "^3.5.5",
     "stripe": "^8.22.0"
   },
   "repository": {
