@@ -12,7 +12,7 @@ test.beforeEach((t) => {
   t.context.idempotencyKey = 'piedpiper'
   t.context.customerId = 'joepug-id'
   t.context.advertiserId = 'bogus-adv'
-  t.context.amount = 500 // 5 bucks
+  t.context.amount = 500000 // 5 bucks in MC
 })
 
 test('processes an advertiser transaction', async (t) => {
