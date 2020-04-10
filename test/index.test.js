@@ -1,16 +1,21 @@
 const test = require('ava')
 const sinon = require('sinon')
 const Stripe = require('../lib/stripe')
+const Db = require('../lib/mongo')
 const Process = require('../lib/process')
 const index = require('../')
 const testEvent = require('./test_event.json')
 
 test.before(() => {
+  sinon.stub(Db.prototype, 'connect')
+  sinon.stub(Db.prototype, 'close')
   sinon.stub(Stripe.prototype, 'setup')
   sinon.stub(Process, 'process').resolves('success baby')
 })
 
 test.afterEach(() => {
+  Db.prototype.connect.reset()
+  Db.prototype.close.reset()
   Stripe.prototype.setup.reset()
   Process.process.reset()
 })

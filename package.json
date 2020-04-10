@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "ci-tests": "nyc --reporter=cobertura ava -t | tap-xunit > TEST_RESULTS.xml",
-    "test": "ava -v",
+    "test": "standard --fix && ava -v",
     "coverage": "nyc npm run test"
   },
   "dependencies": {

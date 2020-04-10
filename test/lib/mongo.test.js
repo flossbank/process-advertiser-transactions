@@ -1,21 +1,19 @@
 const test = require('ava')
 const sinon = require('sinon')
-const { MongoClient, ObjectId } = require('mongodb')
+const { MongoClient } = require('mongodb')
 const Mongo = require('../../lib/mongo')
 
 test.beforeEach((t) => {
   t.context.mongo = new Mongo({
     config: {
       getMongoUri: async () => 'mongodb+srv://0.0.0.0/test',
-      getQueueUrl: async () => 'sqsurl.com',
+      getQueueUrl: async () => 'sqsurl.com'
     }
   })
   t.context.mongo.db = {
     collection: sinon.stub().returns({
-      find: sinon.stub().returns({
-        updateOne: sinon.stub().resolves({
-          modifiedCount: 1
-        })
+      updateOne: sinon.stub().resolves({
+        modifiedCount: 1
       })
     })
   }
