@@ -7,7 +7,7 @@ test.beforeEach((t) => {
     getStripeKey: sinon.stub()
   }
   t.context.stripe = new Stripe({
-    config: t.context.config,
+    config: t.context.config
   })
   t.context.balanceResult = 'poo'
   t.context.stripe.stripeClient = { customers: { createBalanceTransaction: sinon.stub().resolves(t.context.balanceResult) } }
@@ -26,8 +26,15 @@ test('chargeAdvertiser', async (t) => {
   const result = await t.context.stripe.chargeAdvertiser({
     idempotencyKey: t.context.idempotencyKey,
     amount: t.context.amount,
-    customerId: t.context.customerId,
+    customerId: t.context.customerId
   })
+  t.true(t.context.stripe.stripeClient.customers.createBalanceTransaction.calledWith(t.context.customerId, {
+    amount: t.context.amount / 1000,
+    currency: 'usd',
+    description: `Flossbank advertising bill for: ${t.context.amount / 1000} cents`
+  }, {
+    idempotencyKey: t.context.idempotencyKey
+  }))
   t.deepEqual(result, 'poo')
 })
 
@@ -38,6 +45,6 @@ test('chargeAdvertiser | throws', async (t) => {
   await t.throwsAsync(t.context.stripe.chargeAdvertiser({
     idempotencyKey: t.context.idempotencyKey,
     amount: t.context.amount,
-    customerId: t.context.customerId,
+    customerId: t.context.customerId
   }))
 })
