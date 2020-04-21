@@ -36,20 +36,19 @@ test('processes an advertiser transaction', async (t) => {
     record: t.context.record
   })
   t.true(t.context.stripe.chargeAdvertiser.calledOnce)
-  t.deepEqual(log.firstCall.args, [
-    'charging advertiser id: %s, stripe customer: %s, amount: %s, with idempotencyKey: %s',
-    t.context.advertiserId,
-    t.context.customerId,
-    t.context.amount,
-    t.context.idempotencyKey]
+  t.deepEqual(log.firstCall.args, [{
+    advertiserId: t.context.advertiserId,
+    customerId: t.context.customerId,
+    amount: t.context.amount,
+    idempotencyKey: t.context.idempotencyKey
+  }]
   )
   t.deepEqual(log.secondCall.args, [{ lockInfo: { locked_until: '1234' } }])
-  t.true(log.calledWith(
-    'success, charged customer: %s, amount: %s, with mongo id: %s',
-    t.context.customerId,
-    t.context.amount,
-    t.context.advertiserId
-  ))
+  t.true(log.calledWith({
+    customerId: t.context.customerId,
+    amount: t.context.amount,
+    advertiserId: t.context.advertiserId
+  }))
 })
 
 test('updates advertisers balances | errors with stripe', async (t) => {
@@ -94,10 +93,9 @@ test('updates advertisers balances | errors with mongo', async (t) => {
       record: t.context.record
     })
   } catch (e) {}
-  t.false(log.calledWith(
-    'success, charged customer: %s, amount: %s, with mongo id: %s',
-    t.context.customerId,
-    t.context.amount,
-    t.context.advertiserId
-  ))
+  t.false(log.calledWith({
+    customerId: t.context.customerId,
+    amount: t.context.amount,
+    advertiserId: t.context.advertiserId
+  }))
 })

@@ -24,7 +24,7 @@ test('lockIdempotencyKey success', async (t) => {
   const info = await t.context.dynamo.lockIdempotencyKey('test-idempotency-key')
   t.true(t.context.dynamo.docs.update.calledWith({
     TableName: t.context.dynamo.LOCKS_TABLE,
-    Key: { idempotencyKey: 'test-idempotency-key' },
+    Key: { lock_key: 'test-idempotency-key' },
     UpdateExpression: 'SET locked_until = :lockTimeout',
     ConditionExpression: 'attribute_not_exists(locked_until) OR locked_until < :now',
     ExpressionAttributeValues: {
