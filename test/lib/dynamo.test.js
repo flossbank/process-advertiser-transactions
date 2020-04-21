@@ -15,6 +15,9 @@ test.beforeEach((t) => {
     docs: {
       update: sinon.stub().returns({
         promise: sinon.stub().resolves({ Attributes: { a: 1 } })
+      }),
+      delete: sinon.stub().returns({
+        promise: sinon.stub().resolves()
       })
     }
   })
@@ -36,9 +39,18 @@ test('lockIdempotencyKey success', async (t) => {
   t.deepEqual(info, { a: 1 })
 })
 
-test('getSessionInfo failure', async (t) => {
+test('lockIdempotencyKey failure', async (t) => {
   t.context.dynamo.docs.update().promise.throws(new Error('yikes'))
   await t.throwsAsync(t.context.dynamo.lockIdempotencyKey('test-idempotency-key'), {
     message: 'yikes'
   })
+})
+
+test('unlockIdempotencyKey success', async (t) => {
+  const { dynamo } = t.context
+  await dynamo.unlockIdempotencyKey('abc')
+  t.true(dynamo.docs.delete.calledWith({
+    TableName: dynamo.LOCKS_TABLE,
+    Key: { lock_key: 'abc' }
+  }))
 })
