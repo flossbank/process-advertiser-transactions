@@ -9,6 +9,9 @@ test.beforeEach((t) => {
   t.context.db = {
     updateAdvertiserBalance: sinon.stub().resolves()
   }
+  t.context.dynamo = {
+    lockIdempotencyKey: sinon.stub().resolves({ locked_until: '1234' })
+  }
   t.context.idempotencyKey = 'piedpiper'
   t.context.customerId = 'joepug-id'
   t.context.advertiserId = 'bogus-adv'
@@ -29,15 +32,23 @@ test('processes an advertiser transaction', async (t) => {
     stripe: t.context.stripe,
     log,
     db: t.context.db,
+    dynamo: t.context.dynamo,
     record: t.context.record
   })
   t.true(t.context.stripe.chargeAdvertiser.calledOnce)
-  t.true(log.calledWith(
-    'success, charged customer: %s, amount: %s, with mongo id: %s',
-    t.context.customerId,
-    t.context.amount,
-    t.context.advertiserId
-  ))
+  t.deepEqual(log.firstCall.args, [{
+    advertiserId: t.context.advertiserId,
+    customerId: t.context.customerId,
+    amount: t.context.amount,
+    idempotencyKey: t.context.idempotencyKey
+  }]
+  )
+  t.deepEqual(log.secondCall.args, [{ lockInfo: { locked_until: '1234' } }])
+  t.true(log.calledWith({
+    customerId: t.context.customerId,
+    amount: t.context.amount,
+    advertiserId: t.context.advertiserId
+  }))
 })
 
 test('updates advertisers balances | errors with stripe', async (t) => {
@@ -48,14 +59,26 @@ test('updates advertisers balances | errors with stripe', async (t) => {
       stripe: t.context.stripe,
       log,
       db: t.context.db,
+      dynamo: t.context.dynamo,
       record: t.context.record
     })
   } catch (e) {}
-  t.true(log.calledWith(
-    'error processing charge with idempotencyKey: %s, advertiserId: %s',
-    t.context.idempotencyKey,
-    t.context.advertiserId
-  ))
+  t.false(t.context.db.updateAdvertiserBalance.calledOnce)
+})
+
+test('updates advertisers balances | idempotency key is locked', async (t) => {
+  t.context.dynamo.lockIdempotencyKey.rejects(new Error('idempotency key is locked'))
+  const log = sinon.stub()
+  try {
+    await Process.process({
+      stripe: t.context.stripe,
+      log,
+      dynamo: t.context.dynamo,
+      db: t.context.db,
+      record: t.context.record
+    })
+  } catch (e) {}
+  t.false(t.context.db.updateAdvertiserBalance.calledOnce)
 })
 
 test('updates advertisers balances | errors with mongo', async (t) => {
@@ -66,12 +89,13 @@ test('updates advertisers balances | errors with mongo', async (t) => {
       stripe: t.context.stripe,
       log,
       db: t.context.db,
+      dynamo: t.context.dynamo,
       record: t.context.record
     })
   } catch (e) {}
-  t.true(log.calledWith(
-    'error processing charge with idempotencyKey: %s, advertiserId: %s',
-    t.context.idempotencyKey,
-    t.context.advertiserId
-  ))
+  t.false(log.calledWith({
+    customerId: t.context.customerId,
+    amount: t.context.amount,
+    advertiserId: t.context.advertiserId
+  }))
 })
