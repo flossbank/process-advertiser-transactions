@@ -10,7 +10,8 @@ test.beforeEach((t) => {
     updateAdvertiserBalance: sinon.stub().resolves()
   }
   t.context.dynamo = {
-    lockIdempotencyKey: sinon.stub().resolves({ locked_until: '1234' })
+    lockIdempotencyKey: sinon.stub().resolves({ locked_until: '1234' }),
+    unlockIdempotencyKey: sinon.stub().resolves()
   }
   t.context.idempotencyKey = 'piedpiper'
   t.context.customerId = 'joepug-id'

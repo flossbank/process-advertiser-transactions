@@ -35,13 +35,7 @@ exports.handler = async (event) => {
 
   try {
     await stripe.setup()
-    return Promise.all(event.Records.map(record => Process.process({
-      record,
-      stripe,
-      log,
-      db,
-      dynamo
-    })))
+    await Promise.all(event.Records.map(record => Process.process({ record, stripe, log, db, dynamo })))
   } finally {
     db.close()
   }

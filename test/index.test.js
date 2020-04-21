@@ -25,13 +25,13 @@ test.after.always(() => {
 })
 
 test.serial('processes records', async (t) => {
-  const res = await index.handler(testEvent)
-  t.deepEqual(res.length, 1)
-  t.deepEqual(await res[0], 'success baby')
+  await index.handler(testEvent)
   t.true(Process.process.calledOnce)
+  t.true(Db.prototype.close.calledOnce)
 })
 
 test.serial('throws on processing errors', async (t) => {
   Process.process.rejects()
   await t.throwsAsync(index.handler(testEvent))
+  t.true(Db.prototype.close.calledOnce)
 })
