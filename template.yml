@@ -33,6 +33,7 @@ Resources:
             Queue: !GetAtt ProcessAdvertiserTransactionsQueue.Arn
             BatchSize: 1
       Policies:
+        - AmazonDynamoDBFullAccess
         - AmazonSQSFullAccess
         - Statement:
           - Effect: Allow
